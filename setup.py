@@ -23,6 +23,7 @@ setuptools.setup(
     keywords="microbiology taxonomy nomenclature bacteria archaea",
     install_requires=[
         "python-keycloak",
-        "requests"
+        "requests>=2.25.1",
+        "urllib3>=1.26.5"
     ]
 )
