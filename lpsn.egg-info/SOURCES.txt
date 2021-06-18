@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+lpsn/__init__.py
+lpsn/client.py
+lpsn.egg-info/PKG-INFO
+lpsn.egg-info/SOURCES.txt
+lpsn.egg-info/dependency_links.txt
+lpsn.egg-info/requires.txt
+lpsn.egg-info/top_level.txt
