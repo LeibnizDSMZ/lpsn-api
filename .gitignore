@@ -1,0 +1,3 @@
+dist/*
+lpsn.egg-info/*
+.vscode/*
