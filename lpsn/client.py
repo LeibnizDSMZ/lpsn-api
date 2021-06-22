@@ -49,16 +49,20 @@ class LpsnClient():
             # if base is missing add default:
             url = baseurl + url
         resp = self.do_request(url)
+        if resp.status_code == 500 or resp.status_code == 400:
+            return json.loads(resp.content)
+        elif (resp.status_code == 401):
+            msg = json.loads(resp.content)
 
-        if (resp.status_code != 200):
-            # Access token might have expired (15 minutes life time).
-            # Get new tokens using refresh token and try again.
-            token = self.keycloak_openid.refresh_token(self.refresh_token)
-            self.access_token = token['access_token']
-            self.refresh_token = token['refresh_token']
-
-            resp = self.do_request(url)
-
+            if msg['message'] == "Expired token":
+                # Access token might have expired (15 minutes life time).
+                # Get new tokens using refresh token and try again.
+                token = self.keycloak_openid.refresh_token(self.refresh_token)
+                self.access_token = token['access_token']
+                self.refresh_token = token['refresh_token']
+                return self.do_api_call(url)
+                
+            return msg
         else:
             return json.loads(resp.content)
 
@@ -104,29 +108,8 @@ class LpsnClient():
             yield from self.retrieve(filter)
 
     def search(self, **params):
-        ''' Initialize search with ́the following possible parameters:
-
-        taxon-name -- free text, minimum 4 characters maximum 200 characters
-        category -- permitted values: domain, phylum, class, order, family, genus, species, 
-                    subspecies, infrakingdom, kingdom, subphylum, subkingdom, suborder, subgenus, 
-                    superphylum, tribe, subclass, superclass
-        nomenclatural-type -- permitted values: yes, no
-        validly-published -- allowed values: yes, no
-        candidatus -- permitted values: yes, no
-        correct-name -- permitted values: yes, no
-        authority -- free text, minimum 2 characters maximum 200 Characters
-        deposit -- free text, minimum 1 characters maximum 100 Characters
-        etymology -- free text, minimum 1 characters maximum 100 Characters
-        gender -- permitted values: feminine, masculine, neuter
-        date-option -- permitted values: before, after, between;
-        date -- date format: YYYY-MM-DD
-        date-between -- date format: YYYY-MM-DD
-        riskgroup -- permitted values: 1, 2, 3
+        ''' Initialize search with parameters
         '''
-
-        allowed = ["taxon-name", "category", "nomenclatural-type", "validly-published", "candidatus", "correct-name",
-                   "authority", "deposit", "etymology", "gender", "date-option", "date", "date-between", "riskgroup"]
-
         if 'id' in params:
             query = params['id']
             if type(query) == type(""):
@@ -138,11 +121,6 @@ class LpsnClient():
         query = []
         for k, v in params.items():
             k = k.replace("_", "-")
-            if k not in allowed:
-                print(
-                    "WARNING: The search parameter "+k+" is not allowed. Select one of the following:")
-                print(", ".join(allowed))
-
             if v == True:
                 v = "yes"
             elif v == False:
@@ -156,7 +134,8 @@ class LpsnClient():
             print("ERROR: Something went wrong. Please check your query and try again")
             exit()
         if not 'count' in self.result:
-            print("ERROR:", self.result)
+            print("ERROR:", self.result.get("title"))
+            print(self.result.get("message"))
             exit()
         if self.result['count'] == 0:
             print("Your search did not receive any results.")
@@ -165,15 +144,15 @@ class LpsnClient():
 
 
 if __name__ == "__main__":
-    lpsn = LpsnClient('name@mail.example', 'password')
+    client = LpsnClient('name@mail.example', 'password')
 
     # the prepare method fetches all LPSN-IDs matching your query
     # and returns the number of IDs found
-    count = lpsn.search(category='species', taxon_name='Sulfolobus')
-    print(count, 'strains found.')
+    count = client.search(category='species', taxon_name='Sulfolobus')
+    print(count, 'entries found.')
 
-    # The retrieve method lets you iterate over all strains
+    # The retrieve method lets you iterate over all entries
     # and returns the full entry as dict
     # Entries can be further filtered using a list of keys (e.g. ['full_name', 'lpsn_taxonomic_status'])
-    for strain in lpsn.retrieve():
-        print(strain)
+    for entry in client.retrieve():
+        print(entry)

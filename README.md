@@ -16,13 +16,13 @@ client = lpsn.LpsnClient('name@mail.example', 'password')
 # the prepare method fetches all LPSN-IDs matching your query
 # and returns the number of IDs found
 count = client.search(taxon_name='Sulfolobus', correct_name='yes')
-print(count, 'strains found.')
+print(count, 'entries found.')
 
 # the retrieve method lets you iterate over all results
 # and returns the full entry as dict
 # Entries can be further filtered using a list of keys (e.g. ['keywords'])
-for strain in client.retrieve():
-    print(strain)
+for entry in client.retrieve():
+    print(entry)
 ```
 
 ## Example queries:
