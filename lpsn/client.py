@@ -36,7 +36,6 @@ class LpsnClient():
             print("-- Authentification successful --")
         except KeycloakAuthenticationError as e:
             print("ERROR - Authentification failed:", e)
-            exit()
 
     def do_api_call(self, url):
         ''' Initialize API call on given URL and returns result as json '''
@@ -132,14 +131,17 @@ class LpsnClient():
 
         if not self.result:
             print("ERROR: Something went wrong. Please check your query and try again")
-            exit()
+            return 0
+            
         if not 'count' in self.result:
             print("ERROR:", self.result.get("title"))
             print(self.result.get("message"))
-            exit()
+            return 0
+            
         if self.result['count'] == 0:
             print("Your search did not receive any results.")
-            exit()
+            return 0
+            
         return self.result['count']
 
 
