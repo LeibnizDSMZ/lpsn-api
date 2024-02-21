@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="lpsn",
-    version="0.1",
+    version="1.0.0",
     description="LPSN-API - Programmatic Access to LPSN",
     long_description=long_description,
     long_description_content_type="text/markdown",
